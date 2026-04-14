@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #F8FAF6;
+  --color-text: #0F172A;
+  --color-primary: #1E40AF;
+  --color-primary-5: color-mix(in srgb, var(--color-primary) 5%, transparent);
+  --color-primary-30: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  --color-success: #166534;
+
+  /* Adjusting base typography for 50+ users */
+  --text-base: 1.125rem;
+  --text-base--line-height: 1.75rem;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.5rem;
+  --text-xl--line-height: 2rem;
+  --text-2xl: 1.875rem;
+  --text-2xl--line-height: 2.25rem;
+
+  --font-weight-semibold: 600;
+}
+
+/* 
+  Tremor uses some legacy colors or internal mappings. 
+  By adding our custom colors to the @theme, they become accessible to Tailwind's engine.
+*/
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+}

@@ -1,0 +1,54 @@
+import os
+
+# Conteúdo do .gitignore para um projeto Next.js + Node + Supabase
+gitignore_content = """
+# Dependências
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+
+# Build e Outputs
+dist/
+build/
+.vercel
+*.log
+
+# Variáveis de Ambiente (CRÍTICO: nunca subir esses arquivos)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Debug e Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Sistema (macOS / Windows)
+.DS_Store
+Thumbs.db
+
+# Supabase (opcional, se usar a CLI)
+supabase/.temp/
+.supabase/
+
+# IDEs
+.vscode/
+.idea/
+"""
+
+# Nome do arquivo
+file_name = ".gitignore"
+
+# Escrevendo o arquivo no ambiente
+with open(file_name, "w", encoding="utf-8") as f:
+    f.write(gitignore_content.strip())
+
+print(f"Arquivo {file_name} gerado com sucesso.")
