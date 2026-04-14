@@ -10,14 +10,17 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.10",
+    "@supabase/supabase-js": "^2.103.0",
     "@tailwindcss/postcss": "^4.2.2",
-    "@tremor/react": "^3.18.7",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^1.8.0",
     "next": "^16.2.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-is": "^19.0.0",
+    "recharts": "^3.8.1",
+    "sonner": "^1.7.4",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {

@@ -1,34 +1,32 @@
 "use client";
 
-import { BarChart } from '@tremor/react';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from 'recharts';
+import type { DailyExpensePoint } from '@/lib/mockData';
 
-const mockData = [
-  { date: '01 Abr', 'Gastos': 120 },
-  { date: '02 Abr', 'Gastos': 150 },
-  { date: '03 Abr', 'Gastos': 60 },
-  { date: '04 Abr', 'Gastos': 400 },
-  { date: '05 Abr', 'Gastos': 250 },
-  { date: '06 Abr', 'Gastos': 190 },
-  { date: '07 Abr', 'Gastos': 30 },
-];
+type Props = { data: DailyExpensePoint[] };
 
-export function DailyExpenses() {
+export function DailyExpenses({ data }: Props) {
   return (
-    <div className="flex flex-col h-full bg-white p-6 rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-      <h3 className="font-bold text-gray-900 text-lg mb-1">Gastos Diários</h3>
-      <p className="text-gray-500 text-sm mb-6">Mapeamento dos últimos 7 dias operacionais</p>
-      
-      <div className="flex-1 min-h-[300px]">
-        <BarChart
-          data={mockData}
-          index="date"
-          categories={['Gastos']}
-          colors={['blue']}
-          valueFormatter={(v) => `R$ ${v.toFixed(0)}`}
-          yAxisWidth={60}
-          className="h-full w-full"
-          showAnimation
-        />
+    <div className="flex flex-col h-full bg-white p-5 rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <h3 className="font-bold text-gray-800 text-sm mb-0.5">Gastos Diários</h3>
+      <p className="text-gray-400 text-xs mb-4">Últimos 7 dias</p>
+      <div className="flex-1 min-h-[200px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+            <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#9ca3af' }} />
+            <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} width={55}
+              tickFormatter={(v) => `R$${v >= 1000 ? `${(v/1000).toFixed(1)}k` : v}`}
+            />
+            <Tooltip
+              formatter={(v: number) => [`R$ ${v.toFixed(2)}`, 'Gastos']}
+              contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+            />
+            <Bar dataKey="Gastos" fill="#1E40AF" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

@@ -1,31 +1,38 @@
 "use client";
 
-import { DonutChart } from '@tremor/react';
+import {
+  PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
+} from 'recharts';
+import type { CategoryPoint } from '@/lib/mockData';
 
-const mockData = [
-  { category: 'Alimentação', value: 850.5 },
-  { category: 'Locomoção', value: 320.0 },
-  { category: 'Saúde', value: 1200.0 },
-  { category: 'Lazer', value: 450.0 },
-  { category: 'Casa', value: 1800.0 },
-];
+const COLORS = ['#1E40AF', '#0ea5e9', '#6366f1', '#8b5cf6', '#166534'];
 
-export function CategoryDistribution() {
+type Props = { data: CategoryPoint[] };
+
+export function CategoryDistribution({ data }: Props) {
   return (
-    <div className="flex flex-col h-full bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-      <h3 className="font-bold text-gray-900 text-lg mb-1">Distribuição Global</h3>
-      <p className="text-gray-500 text-sm mb-8">Baseado nas macros ativas</p>
-      
-      <div className="flex-1 flex items-center justify-center">
-        <DonutChart
-          data={mockData}
-          category="value"
-          index="category"
-          valueFormatter={(v) => `R$ ${v.toFixed(2)}`}
-          colors={['blue', 'sky', 'indigo', 'violet', 'fuchsia']}
-          className="h-60"
-          showAnimation
-        />
+    <div className="flex flex-col h-full bg-white p-5 rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <h3 className="font-bold text-gray-800 text-sm mb-0.5">Distribuição por Categoria</h3>
+      <p className="text-gray-400 text-xs mb-2">Macros ativas</p>
+      <div className="flex-1 min-h-[200px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={data} cx="50%" cy="45%" innerRadius="40%" outerRadius="65%"
+              paddingAngle={3} dataKey="value"
+            >
+              {data.map((_, i) => (
+                <Cell key={`c-${i}`} fill={COLORS[i % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip
+              formatter={(v: number) => [`R$ ${v.toFixed(2)}`]}
+              contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '12px' }}
+            />
+            <Legend iconType="circle" iconSize={8}
+              formatter={(v) => <span style={{ fontSize: '11px', color: '#4b5563' }}>{v}</span>}
+            />
+          </PieChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
