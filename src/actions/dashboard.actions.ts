@@ -13,8 +13,46 @@ export interface DashboardData {
   categories: CategoryPoint[];
 }
 
+export interface MonthInfo {
+  value: string;
+  label: string;
+  status: 'complete' | 'incomplete';
+}
+
+export async function fetchAvailableMonths(orgSlug: OrgSlug): Promise<ActionResult<MonthInfo[]>> {
+  try {
+    const db = createAdminClient();
+    const { data: org } = await db.from('organizations').select('id').eq('slug', orgSlug).single();
+    if (!org) return { success: false, error: 'Org não encontrada.' };
+
+    const { data, error } = await db
+      .from('organizacao_meses')
+      .select('mes, dias_com_registro')
+      .eq('organization_id', org.id)
+      .order('mes', { ascending: false });
+
+    if (error) return { success: false, error: error.message };
+
+    const months: MonthInfo[] = (data ?? []).map((row: any) => {
+      const [y, m] = row.mes.split('-');
+      const date = new Date(parseInt(y), parseInt(m) - 1, 1);
+      const label = date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).replace('.', '');
+      return {
+        value: row.mes,
+        label: label.charAt(0).toUpperCase() + label.slice(1),
+        status: (row.dias_com_registro < 10) ? 'incomplete' : 'complete'
+      };
+    });
+
+    return { success: true, data: months };
+  } catch (err) {
+    return { success: false, error: (err as Error).message };
+  }
+}
+
 export async function fetchDashboardData(
-  orgSlug: OrgSlug
+  orgSlug: OrgSlug,
+  month?: string
 ): Promise<ActionResult<DashboardData>> {
   try {
     const db = createAdminClient();
@@ -29,19 +67,26 @@ export async function fetchDashboardData(
     if (orgErr || !org) return { success: false, error: `Org '${orgSlug}' não encontrada.` };
     const orgId = org.id as string;
 
-    // 2. Mês atual (início e fim)
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-      .toISOString().split('T')[0];
-
-    // 3. Todas as transações aprovadas do mês
-    const { data: txs, error: txErr } = await db
+    // 2. Filtro de Mês
+    let query = db
       .from('transacoes')
       .select('valor, data_gasto, categoria_id, categorias(nome_global)')
       .eq('organization_id', orgId)
       .eq('status', 'aprovado')
-      .gte('data_gasto', startOfMonth)
       .order('data_gasto', { ascending: true });
+
+    if (month) {
+      const [year, m] = month.split('-');
+      const startDate = `${year}-${m}-01`;
+      const endDate = new Date(parseInt(year), parseInt(m), 0).toISOString().split('T')[0];
+      query = query.gte('data_gasto', startDate).lte('data_gasto', endDate);
+    } else {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      query = query.gte('data_gasto', startOfMonth);
+    }
+
+    const { data: txs, error: txErr } = await query;
 
     if (txErr) return { success: false, error: txErr.message };
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { getUserOrganizations, type UserOrgAccess } from '@/actions/auth.actions';
@@ -11,7 +11,7 @@ type Step = 'form' | 'org-select';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setCurrentAccess } = useOrgContext();
+  const { setCurrentAccess, user, currentOrg, userOrgs } = useOrgContext();
 
   const [step, setStep]           = useState<Step>('form');
   const [email, setEmail]         = useState('');
@@ -20,6 +20,17 @@ export default function LoginPage() {
   const [error, setError]         = useState('');
   const [orgs, setOrgs]           = useState<UserOrgAccess[]>([]);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (user) {
+      if (currentOrg) {
+        router.push('/');
+      } else if (userOrgs.length > 1) {
+        setOrgs(userOrgs);
+        setStep('org-select');
+      }
+    }
+  }, [user, currentOrg, userOrgs, router]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();

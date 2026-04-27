@@ -10,7 +10,7 @@ export default function CategoriesPage() {
   ];
 
   return (
-    <div className="flex h-screen w-full max-w-[1600px] mx-auto overflow-hidden bg-gray-50 text-sm">
+    <div className="flex flex-1 w-full h-full max-w-[1600px] mx-auto overflow-hidden bg-gray-50 text-sm">
       <AdminSidebar />
       <div className="flex-1 overflow-y-auto p-10 flex flex-col gap-8">
         <header>

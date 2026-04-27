@@ -32,6 +32,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
   async function loadOrgs(u: User) {
     setUser(u);
+
     const result = await getUserOrganizations(u.id);
     if (!result.success) { setIsLoading(false); return; }
 
@@ -51,13 +52,20 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) loadOrgs(session.user);
-      else setIsLoading(false);
+      if (session?.user) {
+        document.cookie = `sb-auth-token=${session.access_token}; path=/; max-age=31536000; SameSite=Lax; secure`;
+        loadOrgs(session.user);
+      } else {
+        setIsLoading(false);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session?.user) { loadOrgs(session.user); }
-      else {
+      if (session?.user) {
+        document.cookie = `sb-auth-token=${session.access_token}; path=/; max-age=31536000; SameSite=Lax; secure`;
+        loadOrgs(session.user);
+      } else {
+        document.cookie = 'sb-auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         setUser(null); setUserOrgs([]); setCurrentOrg(null); setIsLoading(false);
         sessionStorage.removeItem('currentOrgSlug');
       }
@@ -72,7 +80,17 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
     sessionStorage.setItem('currentOrgSlug', access.org.slug);
   };
 
-  const signOut = async () => { await supabase.auth.signOut(); };
+  const signOut = async () => { 
+    await supabase.auth.signOut(); 
+  };
+
+  if (isLoading) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-gray-500 font-medium animate-pulse">Carregando...</div>
+      </div>
+    );
+  }
 
   return (
     <OrgContext.Provider value={{ user, currentOrg, userOrgs, currentRole, setCurrentAccess, signOut, isLoading }}>

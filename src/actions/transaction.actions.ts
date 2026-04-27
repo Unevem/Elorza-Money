@@ -110,3 +110,61 @@ export async function createPedidoAlteracao(input: {
     return { success: false, error: (err as Error).message };
   }
 }
+
+export interface TransactionRow {
+  id: string;
+  data_gasto: string;
+  descricao: string;
+  valor: number;
+  categoria_global: string;
+}
+
+export async function fetchAdminTransactions(
+  orgSlug: string,
+  month?: string,
+  search?: string,
+  category?: string
+): Promise<ActionResult<TransactionRow[]>> {
+  try {
+    const db = createAdminClient();
+    const { data: org } = await db.from('organizations').select('id').eq('slug', orgSlug).single();
+    if (!org) return { success: false, error: 'Org não encontrada.' };
+
+    let query = db
+      .from('transacoes')
+      .select('id, data_gasto, descricao, valor, categorias(nome_global)')
+      .eq('organization_id', org.id)
+      .eq('status', 'aprovado')
+      .order('data_gasto', { ascending: false });
+
+    if (month) {
+      const [year, m] = month.split('-');
+      const startDate = `${year}-${m}-01`;
+      const endDate = new Date(parseInt(year), parseInt(m), 0).toISOString().split('T')[0];
+      query = query.gte('data_gasto', startDate).lte('data_gasto', endDate);
+    }
+
+    if (search) {
+      query = query.ilike('descricao', `%${search}%`);
+    }
+
+    const { data, error } = await query;
+    if (error) return { success: false, error: error.message };
+
+    const formatted: TransactionRow[] = (data ?? []).map((t: any) => ({
+      id: t.id,
+      data_gasto: t.data_gasto,
+      descricao: t.descricao,
+      valor: t.valor,
+      categoria_global: t.categorias?.nome_global || 'Outros'
+    }));
+
+    if (category && category !== 'all') {
+      return { success: true, data: formatted.filter(t => t.categoria_global === category) };
+    }
+
+    return { success: true, data: formatted };
+  } catch (err) {
+    return { success: false, error: (err as Error).message };
+  }
+}

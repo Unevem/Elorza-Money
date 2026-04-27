@@ -9,7 +9,7 @@ export default function AdminDashboard() {
   const { currentOrg, setCurrentOrg } = useOrganization();
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-gray-50 text-sm">
+    <div className="flex flex-1 w-full h-full overflow-hidden bg-gray-50 text-sm">
       <AdminSidebar currentOrg={currentOrg} onOrgChange={setCurrentOrg} />
 
       <div className="flex-1 flex overflow-hidden min-w-0">
